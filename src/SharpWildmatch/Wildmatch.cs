@@ -11,7 +11,8 @@ namespace SharpWildmatch
         public const int WM_MATCH = 0;
         public const int WM_ABORT_ALL = -1;
         public const int WM_ABORT_TO_STARSTAR = -2;
-
+        // ReSharper restore InconsistentNaming
+        
         [Flags]
         enum MatchFlags
         {
@@ -19,7 +20,7 @@ namespace SharpWildmatch
             CaseFolder = 1,
             PathName = 2
         }
-        // ReSharper restore InconsistentNaming
+        
 
         private static int DoWild(string pattern, string text, MatchFlags flags)
         {
@@ -28,6 +29,7 @@ namespace SharpWildmatch
             for (; patternIndex < pattern.Length; patternIndex++, textIndex++)
             {
                 bool matchSlash;
+                int matched;
                 var textChar = text.At(textIndex);
                 var patternChar = pattern.At(patternIndex);
                 
@@ -50,27 +52,11 @@ namespace SharpWildmatch
                         continue;
                     case '*':
                         patternIndex++;
+                        patternChar = pattern.At(patternIndex);
                         if (pattern.At(patternIndex) == '*')
                         {
-                            var patterCharPrevious = pattern.At(patternIndex - 2);
-                            while (patternChar == '*')
-                            {
-                                patternIndex++;
-                                patternChar = pattern.At(patternIndex);
-                            }
-
-                            if (!flags.HasFlag(MatchFlags.PathName))
-                            {
-                                matchSlash = true;
-                            }
-                            else if (true) // TODO
-                            {
-                                return WM_ABORT_MALFORMED;
-                            }
-                            else
-                            {
-                                return WM_ABORT_MALFORMED;
-                            }
+                            // TODO:
+                            return WM_ABORT_MALFORMED;
                         }
                         else
                         {
@@ -89,6 +75,33 @@ namespace SharpWildmatch
                         } else if (!matchSlash && patternChar == '/') {
                             // TODO:
                             return WM_ABORT_MALFORMED;
+                        }
+
+                        while (true)
+                        {
+                            if(textChar == null)
+                                break;
+
+                            if (!Sane.IsGlobSpecial(patternChar.Value)) {
+                                while (textChar != null && (matchSlash || textChar != '/'))
+                                {
+                                    if(textChar == patternChar)
+                                        break;
+                                    textIndex++;
+                                    textChar = text.At(textIndex);
+                                }
+                                if (textChar != patternChar)
+                                    return WM_NOMATCH;
+                            }
+                            
+                            if ((matched = DoWild(pattern.Substring(patternIndex), text.Substring(textIndex), flags)) != WM_NOMATCH) {
+                                if (!matchSlash || matched != WM_ABORT_TO_STARSTAR)
+                                    return matched;
+                            } else if (!matchSlash && textChar == '/')
+                                return WM_ABORT_TO_STARSTAR;
+
+                            textIndex++;
+                            textChar = text.At(textIndex);
                         }
                         
                         return WM_ABORT_ALL;

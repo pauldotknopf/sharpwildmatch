@@ -8,9 +8,6 @@ namespace SharpWildmatch.Tests
         [Fact]
         public void Base_wildmatch()
         {
-            //Test(false, false, false, f, "foo", "??");
-            //return;
-            
             //# Basic wildTest(features
             Test(true, true, true, true, "foo", "foo");
             Test(false, false, false, false, "foo", "bar");
