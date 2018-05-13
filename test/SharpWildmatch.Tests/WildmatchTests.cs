@@ -22,7 +22,7 @@ namespace SharpWildmatch.Tests
             Test(true, true, true, true, "aaaaaaabababab", "*ab");
             Test(true, true, true, true, "foo*", "foo\\*");
             Test(false, false, false, false, "foobar", "foo\\*bar");
-            Test(true, true, true, true, "f\\oo", "f\\oo");
+            Test(true, true, true, true, "f\\oo", "f\\\\oo");
             Test(true, true, true, true, "ball", "*[al]?");
             Test(false, false, false, false, "ten", "[ten]");
             Test(false, false, true, true, "ten", "**[!te]");

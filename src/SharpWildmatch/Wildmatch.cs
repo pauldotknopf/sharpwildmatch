@@ -30,8 +30,10 @@ namespace SharpWildmatch
             {
                 bool matchSlash;
                 int matched;
+                int negated;
                 var textChar = text.At(textIndex);
                 var patternChar = pattern.At(patternIndex);
+                char? patternCharPrevious = null;
                 
                 if (textChar == null && patternChar != '*')
                     return WM_ABORT_ALL;
@@ -40,6 +42,7 @@ namespace SharpWildmatch
                 {
                     case '\\':
                         patternIndex++;
+                        patternChar = pattern.At(patternIndex);
                         // fallthrough
                         goto default;
                     default:
@@ -105,6 +108,49 @@ namespace SharpWildmatch
                         }
                         
                         return WM_ABORT_ALL;
+                    case '[':
+                        patternIndex++;
+                        patternChar = pattern.At(patternIndex);
+                        
+                        negated = patternChar == '!' ? 1 : 0;
+                        if (negated == 1)
+                        {
+                            patternIndex++;
+                            patternChar = pattern.At(patternIndex);
+                        }
+                        
+                        patternCharPrevious = null;
+                        matched = 0;
+
+                        bool Next()
+                        {
+                            patternCharPrevious = patternChar;
+                            patternIndex++;
+                            patternChar = pattern.At(patternIndex);
+                            return patternChar != ']';
+                        }
+
+                        do
+                        {
+                            if (false)
+                            {
+                                
+                            }else if (false)
+                            {
+                                
+                            }else if (false)
+                            {
+                                
+                            }else if (patternChar == textChar)
+                            {
+                                matched = 1;
+                            }
+                        } while (Next());
+                        
+                        if (matched == negated ||
+                            (flags.HasFlag(MatchFlags.PathName)) && textChar == '/')
+                            return WM_NOMATCH;
+                        continue;
                 }
             }
 
