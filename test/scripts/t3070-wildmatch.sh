@@ -3,8 +3,39 @@
 test_description='wildmatch tests'
 
 set -e
+set -x
 
-. ./test-lib.sh
+test_eval_() {
+	eval "$*"
+}
+
+test_run_ () {
+	test_cleanup=:
+	expecting_failure=$2
+
+	test_eval_ "$1"
+	eval_ret=$?
+
+	exit 0
+	return "$eval_ret"
+}
+
+test_expect_success() {
+	if test_run_ "$2"
+	then
+		test_ok_ "$1"
+	else
+		test_failure_ "$@"
+	fi
+}
+
+test_expect_failure() {
+	echo "sdfs"
+}
+
+test_done() {
+	echo "sdf"
+}
 
 should_create_test_file() {
 	file=$1
