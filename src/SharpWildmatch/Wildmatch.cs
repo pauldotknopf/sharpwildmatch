@@ -132,12 +132,24 @@ namespace SharpWildmatch
 
                         do
                         {
-                            if (false)
+                            if (patternChar == '\\')
                             {
-                                
-                            }else if (false)
+                                throw new NotImplementedException();
+                            }
+                            else if (patternChar == '-' 
+                                     && patternCharPrevious != null
+                                     && pattern.At(patternIndex+1) != null
+                                     && pattern.At(patternIndex+1) != ']')
                             {
-                                
+                                patternIndex++;
+                                patternChar = pattern.At(patternIndex);
+                                // ﻿p_ch == '-' && prev_ch && p[1] && p[1] != ']'
+                                if (textChar <= patternChar && textChar >= patternCharPrevious)
+                                    matched = 1;
+                                else {
+                                    throw new NotImplementedException();
+                                }
+                                patternChar = null;
                             }else if (false)
                             {
                                 

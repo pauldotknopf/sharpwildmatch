@@ -1,4 +1,5 @@
-﻿using FluentAssert;
+﻿using System;
+using FluentAssert;
 using Xunit;
 
 namespace SharpWildmatch.Tests
@@ -222,7 +223,15 @@ namespace SharpWildmatch.Tests
 
         private void Test(bool glob, bool globInsenstive, bool pathmatch, bool pathmatchInsensitive, string input, string pattern)
         {
-            Wildmatch.Match(pattern, input, 0).ShouldBeEqualTo(glob, $"Rule for input: '{input}' pattern: '{pattern}' failed.");
+            try
+            {
+                Wildmatch.Match(pattern, input, 0)
+                    .ShouldBeEqualTo(glob, $"Rule for input: '{input}' pattern: '{pattern}' failed.");
+            }
+            catch (Exception ex)
+            {
+                Assert.False(true, $"Rule for input: '{input}' pattern: '{pattern}' failed with: {ex.Message}");
+            }
         }
     }
 }
