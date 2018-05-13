@@ -17,7 +17,7 @@ namespace SharpWildmatch
         enum MatchFlags
         {
             None = 0,
-            CaseFolder = 1,
+            CaseFold = 1,
             PathName = 2
         }
         
@@ -50,7 +50,7 @@ namespace SharpWildmatch
                             return WM_NOMATCH;
                         continue;
                     case '?':
-                        if (flags.HasFlag(MatchFlags.CaseFolder) && textChar == '/')
+                        if (flags.HasFlag(MatchFlags.CaseFold) && textChar == '/')
                             return WM_NOMATCH;
                         continue;
                     case '*':
@@ -111,6 +111,9 @@ namespace SharpWildmatch
                     case '[':
                         patternIndex++;
                         patternChar = pattern.At(patternIndex);
+
+                        if (patternChar == '^')
+                            patternChar = '!';
                         
                         negated = patternChar == '!' ? 1 : 0;
                         if (negated == 1)
@@ -145,9 +148,14 @@ namespace SharpWildmatch
                                 patternChar = pattern.At(patternIndex);
                                 // ﻿p_ch == '-' && prev_ch && p[1] && p[1] != ']'
                                 if (textChar <= patternChar && textChar >= patternCharPrevious)
+                                {
                                     matched = 1;
-                                else {
-                                    throw new NotImplementedException();
+                                }
+                                else if (flags.HasFlag(MatchFlags.CaseFold) && char.IsLower(textChar.Value))
+                                {
+                                    var textCharUpper = char.ToUpper(textChar.Value);
+                                    if (textCharUpper <= patternChar && textCharUpper >= patternCharPrevious)
+                                        matched = 1;
                                 }
                                 patternChar = null;
                             }else if (false)

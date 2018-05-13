@@ -7,7 +7,7 @@ namespace SharpWildmatch.Tests
     public class WildmatchTests
     {
         [Fact]
-        public void Base_wildmatch()
+        public void Basic_wildmatch()
         {
             //# Basic wildTest(features
             Test(true, true, true, true, "foo", "foo");
