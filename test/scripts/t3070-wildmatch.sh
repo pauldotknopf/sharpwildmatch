@@ -2,6 +2,8 @@
 
 test_description='wildmatch tests'
 
+set -e
+
 . ./test-lib.sh
 
 should_create_test_file() {
