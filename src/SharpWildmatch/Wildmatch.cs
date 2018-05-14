@@ -32,7 +32,7 @@ namespace SharpWildmatch
                             return MatchResult.NoMatch;
                         continue;
                     case '?':
-                        if (flags.HasFlag(MatchFlags.CaseFold) && textChar == '/')
+                        if (flags.HasFlag(MatchFlags.PathName) && textChar == '/')
                             return MatchResult.NoMatch;
                         continue;
                     case '*':
@@ -103,13 +103,21 @@ namespace SharpWildmatch
                              * only if there are no more slash characters. */
                             if (!matchSlash)
                             {
-                                if (text.Contains("/"))
+                                var temp = text.Substring(textIndex);
+                                if (text.Substring(textIndex).Contains("/"))
                                     return MatchResult.NoMatch;
                             }
                             return (int)MatchResult.Match;
                         } else if (!matchSlash && patternChar == '/') {
-                            // TODO:
-                            throw new NotImplementedException();
+                            int nextIndex = text.Substring(textIndex).IndexOf('/');
+                            if (nextIndex == -1)
+                            {
+                                return MatchResult.NoMatch;
+                            }
+
+                            textIndex += nextIndex;
+                            textChar = text.At(textIndex);
+                            break;
                         }
 
                         while (true)
