@@ -1,33 +1,24 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace SharpWildmatch
 {
     public class Wildmatch
     {
-        // ReSharper disable InconsistentNaming
-        public const int WM_ABORT_MALFORMED = 2;
-        public const int WM_NOMATCH = 1;
-        public const int WM_MATCH = 0;
-        public const int WM_ABORT_ALL = -1;
-        public const int WM_ABORT_TO_STARSTAR = -2;
-        // ReSharper restore InconsistentNaming
-        
-        private static int DoWild(string pattern, string text, MatchFlags flags)
+        private static MatchResult DoWild(string pattern, string text, MatchFlags flags)
         {
             var patternIndex = 0;
             var textIndex = 0;
             for (; patternIndex < pattern.Length; patternIndex++, textIndex++)
             {
                 bool matchSlash = false;
-                int matched = 0;
+                MatchResult matched;
                 int negated = 0;
                 var textChar = text.At(textIndex);
                 var patternChar = pattern.At(patternIndex);
                 char? patternCharPrevious = null;
                 
                 if (textChar == null && patternChar != '*')
-                    return WM_ABORT_ALL;
+                    return MatchResult.AbortAll;
 
                 switch (patternChar)
                 {
@@ -38,11 +29,11 @@ namespace SharpWildmatch
                         goto default;
                     default:
                         if (textChar != patternChar)
-                            return WM_NOMATCH;
+                            return MatchResult.NoMatch;
                         continue;
                     case '?':
                         if (flags.HasFlag(MatchFlags.CaseFold) && textChar == '/')
-                            return WM_NOMATCH;
+                            return MatchResult.NoMatch;
                         continue;
                     case '*':
                         patternIndex++;
@@ -98,12 +89,12 @@ namespace SharpWildmatch
                             if (!matchSlash)
                             {
                                 if (text.Contains("/"))
-                                    return WM_NOMATCH;
+                                    return MatchResult.NoMatch;
                             }
-                            return WM_MATCH;
+                            return (int)MatchResult.Match;
                         } else if (!matchSlash && patternChar == '/') {
                             // TODO:
-                            return WM_ABORT_MALFORMED;
+                            throw new NotImplementedException();
                         }
 
                         while (true)
@@ -120,20 +111,20 @@ namespace SharpWildmatch
                                     textChar = text.At(textIndex);
                                 }
                                 if (textChar != patternChar)
-                                    return WM_NOMATCH;
+                                    return MatchResult.NoMatch;
                             }
                             
-                            if ((matched = DoWild(pattern.Substring(patternIndex), text.Substring(textIndex), flags)) != WM_NOMATCH) {
-                                if (!matchSlash || matched != WM_ABORT_TO_STARSTAR)
+                            if ((matched = DoWild(pattern.Substring(patternIndex), text.Substring(textIndex), flags)) != MatchResult.NoMatch) {
+                                if (!matchSlash || matched != MatchResult.AbortToStartStart)
                                     return matched;
                             } else if (!matchSlash && textChar == '/')
-                                return WM_ABORT_TO_STARSTAR;
+                                return MatchResult.AbortToStartStart;
 
                             textIndex++;
                             textChar = text.At(textIndex);
                         }
                         
-                        return WM_ABORT_ALL;
+                        return MatchResult.AbortAll;
                     case '[':
                         patternIndex++;
                         patternChar = pattern.At(patternIndex);
@@ -175,13 +166,13 @@ namespace SharpWildmatch
                                 // ﻿p_ch == '-' && prev_ch && p[1] && p[1] != ']'
                                 if (textChar <= patternChar && textChar >= patternCharPrevious)
                                 {
-                                    matched = 1;
+                                    matched = MatchResult.NoMatch;
                                 }
                                 else if (flags.HasFlag(MatchFlags.CaseFold) && char.IsLower(textChar.Value))
                                 {
                                     var textCharUpper = char.ToUpper(textChar.Value);
                                     if (textCharUpper <= patternChar && textCharUpper >= patternCharPrevious)
-                                        matched = 1;
+                                        matched = MatchResult.NoMatch;
                                 }
                                 patternChar = null;
                             }else if (false)
@@ -189,24 +180,25 @@ namespace SharpWildmatch
                                 
                             }else if (patternChar == textChar)
                             {
-                                matched = 1;
+                                matched = MatchResult.NoMatch;
                             }
                         } while (Next());
                         
-                        if (matched == negated ||
+                        if ((int)matched == negated ||
                             (flags.HasFlag(MatchFlags.PathName)) && textChar == '/')
-                            return WM_NOMATCH;
+                            return MatchResult.NoMatch;
                         continue;
                 }
             }
 
-            return textIndex < text.Length ? WM_NOMATCH : WM_MATCH;
+            return textIndex < text.Length ? MatchResult.NoMatch : MatchResult.Match;
         }
         
-        public static bool Match(string pattern, string text, MatchFlags matchFlags)
+        public static MatchResult Match(string pattern, string text, MatchFlags matchFlags)
         {
-            var result = DoWild(pattern, text, matchFlags) == 0 ? 0 : 1;
-            return result == 0;
+            var result =  DoWild(pattern, text, matchFlags);
+            if(result < 0) throw new Exception($"Unexpected error: {result}");
+            return (MatchResult)result;
         }
     }
 }
