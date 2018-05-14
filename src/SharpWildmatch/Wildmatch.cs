@@ -1,20 +1,18 @@
-﻿using System;
+﻿// ReSharper disable InconsistentNaming
 
 namespace SharpWildmatch
 {
-    public class Wildmatch
+    public static class Wildmatch
     {
         private static MatchResult DoWild(CharPointer p, CharPointer text, MatchFlags flags)
         {
             char p_ch;
-            CharPointer pattern = p;
+            var pattern = p;
             for ( ; (p_ch = p.Value) != '\0'; text = text.Increment(), p = p.Increment())
             {
                 int matched;
-                int negated;
-                bool match_slash;
-                char t_ch, prev_ch;
-                
+                char t_ch;
+
                 if ((t_ch = text.Value) == '\0' && p_ch != '*')
                     return MatchResult.AbortAll;
                 
@@ -22,7 +20,7 @@ namespace SharpWildmatch
                 {
                     if (char.IsUpper(t_ch))
                         t_ch = char.ToLower(t_ch);
-                    if (char.IsLower(p_ch))
+                    if (char.IsUpper(p_ch))
                         p_ch = char.ToLower(p_ch);
                 }
                 
@@ -43,6 +41,7 @@ namespace SharpWildmatch
                         continue;
                     case '*':
                         p = p.Increment();
+                        bool match_slash;
                         if (p.Value == '*')
                         {
                             var prev_p = p.Increment(-2);
@@ -133,14 +132,14 @@ namespace SharpWildmatch
                         if (p_ch == '^')
                             p_ch = '!';
                         
-                        negated = p_ch == '!' ? 1 : 0;
+                        var negated = p_ch == '!' ? 1 : 0;
                         if (negated == 1)
                         {
                             p = p.Increment();
                             p_ch = p.Value;
                         }
                         
-                        prev_ch = '\0';
+                        var prev_ch = '\0';
                         matched = 0;
 
                         bool Next()
@@ -188,18 +187,15 @@ namespace SharpWildmatch
                                 p_ch = '\0';
                             } ﻿else if (p_ch == '[' && p.Increment().Value == ':')
                             {
-                                var s = CharPointer.Null;
-                                p_ch = p.Value;
-
-                                for (s = p.Increment(2); (p_ch = p.Value) != '\0' && p_ch != ']'; p = p.Increment())
-                                {
-                                    
-                                }
+                                CharPointer s;
+                                for (s = p.Increment(2); (p_ch = p.Value) != '\0' && p_ch != ']'; p = p.Increment()) { }
+                                
                                 if (p_ch == '\0')
                                     return MatchResult.AbortAll;
+                                
                                 var i = p.Index - s.Index - 1;
-                                if (i < 0 || p.Increment(-1).Value != ':') {
-                                    /* Didn't find ":]", so treat like a normal set. */
+                                if (i < 0 || p.Increment(-1).Value != ':')
+                                {
                                     p = s.Increment(-2);
                                     p_ch = '[';
                                     if (t_ch == p_ch)
@@ -207,45 +203,6 @@ namespace SharpWildmatch
                                     continue;
                                 }
                                 
-                                
-//                                if (CC_EQ(s,i, "alnum")) {
-//                                    if (ISALNUM(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "alpha")) {
-//                                    if (ISALPHA(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "blank")) {
-//                                    if (ISBLANK(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "cntrl")) {
-//                                    if (ISCNTRL(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "digit")) {
-//                                    if (ISDIGIT(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "graph")) {
-//                                    if (ISGRAPH(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "lower")) {
-//                                    if (ISLOWER(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "print")) {
-//                                    if (ISPRINT(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "punct")) {
-//                                    if (ISPUNCT(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "space")) {
-//                                    if (ISSPACE(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "upper")) {
-//                                    if (ISUPPER(t_ch))
-//                                        matched = 1;
-//                                    else if ((flags & WM_CASEFOLD) && ISLOWER(t_ch))
-//                                        matched = 1;
-//                                } else if (CC_EQ(s,i, "xdigit")) {
-//                                    if (ISXDIGIT(t_ch))
-//                                        matched = 1;
                                 var temp = s.Source.Substring(s.Index);
                                 if (temp.StartsWith("alnum"))
                                 {
@@ -313,7 +270,7 @@ namespace SharpWildmatch
                                     if (Sane.IsXDigit(t_ch))
                                         matched = 1;
                                 }
-                                else /* malformed [:class:] string */
+                                else
                                 {
                                     return MatchResult.AbortAll;
                                 }
