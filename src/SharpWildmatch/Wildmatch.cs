@@ -40,7 +40,8 @@ namespace SharpWildmatch
                         patternChar = pattern.At(patternIndex);
                         if (pattern.At(patternIndex) == '*')
                         {
-                            var previous = pattern.At(patternIndex - 2);
+                            var previousIndex = patternIndex - 2;
+                            var previous = pattern.At(previousIndex);
                             
                             patternIndex++;
                             patternChar = pattern.At(patternIndex);
@@ -53,6 +54,20 @@ namespace SharpWildmatch
                             if (!flags.HasFlag(MatchFlags.PathName))
                             {
                                 matchSlash = true;
+                                // TODO: this doesn't seem right
+                            }else if ((previousIndex < patternIndex || previous == '/') &&
+                                  (patternChar == null || patternChar == '/' ||
+                                      (patternChar == '\\' && pattern.At(patternIndex+1) == '/')))
+                            {
+                                if (patternChar == '/' &&
+                                    DoWild(pattern.Substring(patternIndex + 1), text.Substring(textIndex), flags) ==
+                                    MatchResult.Match)
+                                    return MatchResult.Match;
+                                matchSlash = true;
+                            }
+                            else
+                            {
+                                return MatchResult.AbortMalformed;
                             }
 //                            const uchar *prev_p = p - 2;
 //                            while (*++p == '*') {}
@@ -196,9 +211,7 @@ namespace SharpWildmatch
         
         public static MatchResult Match(string pattern, string text, MatchFlags matchFlags)
         {
-            var result =  DoWild(pattern, text, matchFlags);
-            if(result < 0) throw new Exception($"Unexpected error: {result}");
-            return (MatchResult)result;
+            return DoWild(pattern, text, matchFlags);
         }
     }
 }
