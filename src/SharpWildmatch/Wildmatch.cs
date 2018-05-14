@@ -13,24 +13,15 @@ namespace SharpWildmatch
         public const int WM_ABORT_TO_STARSTAR = -2;
         // ReSharper restore InconsistentNaming
         
-        [Flags]
-        enum MatchFlags
-        {
-            None = 0,
-            CaseFold = 1,
-            PathName = 2
-        }
-        
-
         private static int DoWild(string pattern, string text, MatchFlags flags)
         {
             var patternIndex = 0;
             var textIndex = 0;
             for (; patternIndex < pattern.Length; patternIndex++, textIndex++)
             {
-                bool matchSlash;
-                int matched;
-                int negated;
+                bool matchSlash = false;
+                int matched = 0;
+                int negated = 0;
                 var textChar = text.At(textIndex);
                 var patternChar = pattern.At(patternIndex);
                 char? patternCharPrevious = null;
@@ -58,8 +49,43 @@ namespace SharpWildmatch
                         patternChar = pattern.At(patternIndex);
                         if (pattern.At(patternIndex) == '*')
                         {
-                            // TODO:
-                            return WM_ABORT_MALFORMED;
+                            var previous = pattern.At(patternIndex - 2);
+                            
+                            patternIndex++;
+                            patternChar = pattern.At(patternIndex);
+                            while (patternChar == '*')
+                            {
+                                patternIndex++;
+                                patternChar = pattern.At(patternIndex);
+                            }
+
+                            if (!flags.HasFlag(MatchFlags.PathName))
+                            {
+                                matchSlash = true;
+                            }
+//                            const uchar *prev_p = p - 2;
+//                            while (*++p == '*') {}
+//                            if (!(flags & WM_PATHNAME))
+//                                /* without WM_PATHNAME, '*' == '**' */
+//                                match_slash = 1;
+//                            else if ((prev_p < pattern || *prev_p == '/') &&
+//                                     (*p == '\0' || *p == '/' ||
+//                                      (p[0] == '\\' && p[1] == '/'))) {
+//                                /*
+//                                 * Assuming we already match 'foo/' and are at
+//                                 * <star star slash>, just assume it matches
+//                                 * nothing and go ahead match the rest of the
+//                                 * pattern with the remaining string. This
+//                                 * helps make foo/<*><*>/bar (<> because
+//                                 * otherwise it breaks C comment syntax) match
+//                                 * both foo/bar and foo/a/bar.
+//                                 */
+//                                if (p[0] == '/' &&
+//                                    dowild(p + 1, text, flags) == WM_MATCH)
+//                                    return WM_MATCH;
+//                                match_slash = 1;
+//                            } else
+//                                return WM_ABORT_MALFORMED;
                         }
                         else
                         {
@@ -177,9 +203,10 @@ namespace SharpWildmatch
             return textIndex < text.Length ? WM_NOMATCH : WM_MATCH;
         }
         
-        public static bool Match(string pattern, string text, uint flags)
+        public static bool Match(string pattern, string text, MatchFlags matchFlags)
         {
-            return DoWild(pattern, text, MatchFlags.None) == 0;
+            var result = DoWild(pattern, text, matchFlags) == 0 ? 0 : 1;
+            return result == 0;
         }
     }
 }
