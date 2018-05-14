@@ -55,7 +55,7 @@ namespace SharpWildmatch
                             {
                                 matchSlash = true;
                                 // TODO: this doesn't seem right
-                            }else if ((previousIndex < patternIndex || previous == '/') &&
+                            }else if ((previousIndex < 0 || previous == '/') &&
                                   (patternChar == null || patternChar == '/' ||
                                       (patternChar == '\\' && pattern.At(patternIndex+1) == '/')))
                             {
@@ -69,29 +69,6 @@ namespace SharpWildmatch
                             {
                                 return MatchResult.AbortMalformed;
                             }
-//                            const uchar *prev_p = p - 2;
-//                            while (*++p == '*') {}
-//                            if (!(flags & WM_PATHNAME))
-//                                /* without WM_PATHNAME, '*' == '**' */
-//                                match_slash = 1;
-//                            else if ((prev_p < pattern || *prev_p == '/') &&
-//                                     (*p == '\0' || *p == '/' ||
-//                                      (p[0] == '\\' && p[1] == '/'))) {
-//                                /*
-//                                 * Assuming we already match 'foo/' and are at
-//                                 * <star star slash>, just assume it matches
-//                                 * nothing and go ahead match the rest of the
-//                                 * pattern with the remaining string. This
-//                                 * helps make foo/<*><*>/bar (<> because
-//                                 * otherwise it breaks C comment syntax) match
-//                                 * both foo/bar and foo/a/bar.
-//                                 */
-//                                if (p[0] == '/' &&
-//                                    dowild(p + 1, text, flags) == WM_MATCH)
-//                                    return WM_MATCH;
-//                                match_slash = 1;
-//                            } else
-//                                return WM_ABORT_MALFORMED;
                         }
                         else
                         {
