@@ -166,7 +166,7 @@ namespace SharpWildmatch
                                     return MatchResult.AbortAll;
                                 if (t_ch == p_ch)
                                     matched = 1;
-                            } ﻿else if (p_ch == '-' && prev_ch != '\0' && p.Increment().HasValidChar && p.Increment().Value != ']')
+                            } ﻿else if (p_ch == '-' && prev_ch != '\0' && p.Increment().Value != '\0' && p.Increment().Value != ']')
                             {
                                 p = p.Increment();
                                 p_ch = p.Value;
@@ -206,9 +206,112 @@ namespace SharpWildmatch
                                         matched = 1;
                                     continue;
                                 }
-                                if (false)
+                                
+                                
+//                                if (CC_EQ(s,i, "alnum")) {
+//                                    if (ISALNUM(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "alpha")) {
+//                                    if (ISALPHA(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "blank")) {
+//                                    if (ISBLANK(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "cntrl")) {
+//                                    if (ISCNTRL(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "digit")) {
+//                                    if (ISDIGIT(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "graph")) {
+//                                    if (ISGRAPH(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "lower")) {
+//                                    if (ISLOWER(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "print")) {
+//                                    if (ISPRINT(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "punct")) {
+//                                    if (ISPUNCT(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "space")) {
+//                                    if (ISSPACE(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "upper")) {
+//                                    if (ISUPPER(t_ch))
+//                                        matched = 1;
+//                                    else if ((flags & WM_CASEFOLD) && ISLOWER(t_ch))
+//                                        matched = 1;
+//                                } else if (CC_EQ(s,i, "xdigit")) {
+//                                    if (ISXDIGIT(t_ch))
+//                                        matched = 1;
+                                var temp = s.Source.Substring(s.Index);
+                                if (temp.StartsWith("alnum"))
                                 {
-                                    // TODO:
+                                    if (Sane.IsAlNum(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("alpha"))
+                                {
+                                    if (Sane.IsAlpha(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("blank"))
+                                {
+                                    if (Sane.IsBlank(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("cntrl"))
+                                {
+                                    if (Sane.IsCtrl(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("digit"))
+                                {
+                                    if (Sane.IsDigit(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("graph"))
+                                {
+                                    if (Sane.IsGraph(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("lower"))
+                                {
+                                    if (char.IsLower(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("print"))
+                                {
+                                    if (Sane.IsPrint(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("punct"))
+                                {
+                                    if (Sane.IsPunc(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("space"))
+                                {
+                                    if (Sane.IsSpace(t_ch))
+                                        matched = 1;
+                                }
+                                else if (temp.StartsWith("upper"))
+                                {
+                                    if (char.IsUpper(t_ch))
+                                    {
+                                        matched = 1;
+                                    }
+                                    else if (flags.HasFlag(MatchFlags.CaseFold) && char.IsLower(t_ch))
+                                    {
+                                        matched = 1;
+                                    }
+                                }
+                                else if (temp.StartsWith("xdigit"))
+                                {
+                                    if (Sane.IsXDigit(t_ch))
+                                        matched = 1;
                                 }
                                 else /* malformed [:class:] string */
                                 {
