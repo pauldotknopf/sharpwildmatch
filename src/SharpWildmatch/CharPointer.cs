@@ -2,7 +2,7 @@
 
 namespace SharpWildmatch
 {
-    public struct CharPointer
+    internal struct CharPointer
     {
         private readonly string _source;
         private readonly int _index;
